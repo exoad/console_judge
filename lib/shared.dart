@@ -16,8 +16,33 @@ final Random RNG = Random(DateTime.now().millisecondsSinceEpoch);
 const bool kEnforceChecks = true;
 const bool kAllowDebugTracing = true;
 
+final Map<Lang, String Function(String location)> G_executors =
+    <Lang, String Function(String location)>{};
+
 final Map<String, dynamic Function([List<String>? arguments])> G_Options =
     <String, dynamic Function([List<String>? arguments])>{
+  "C_runners": ([List<String>? _]) {
+    StringBuffer buffer = StringBuffer();
+    buffer.writeln("Console Judge all supported Runners");
+    Map<Lang, List<List<String>>> versions = <Lang, List<List<String>>>{};
+    for (Runners e in Runners.values) {
+      if (versions.containsKey(e.associated)) {
+        versions[e.associated]!.add(e.aliases);
+      } else {
+        versions[e.associated] = <List<String>>[e.aliases];
+      }
+    }
+    buffer.writeNewLine();
+    for (Lang l in versions.keys) {
+      buffer.writeln(l.canonicalName);
+      int i = 1;
+      for (List<String> all in versions[l]!) {
+        buffer.writeln("  $i) \"${all[0]}\" : ${all.sublist(1).join(", ")}");
+        i++;
+      }
+    }
+    console.write(buffer.toString());
+  },
   "C_version": ([List<String>? _]) {
     console.write(Strings.L_Version);
     console.writeLine();
@@ -44,20 +69,27 @@ final Map<String, dynamic Function([List<String>? arguments])> G_Options =
     );
     return;
   },
-  "C_src": ([List<String>? args]) {
+  "C_src": ([List<String>? args]) /* [ void | int ] */ {
     if (args == null) {
       G_Options["C_help"]!();
       $__FINAL("Detect_Fatal: C_src(null) resolved!",
           Codes.kInCompleteArgumentsSupplied);
     } else {
       String loc = args[0];
-      if (loc.contains("/")) {
-        loc = loc.split("/").last;
-      } else if (loc.contains("\\")) {
-        loc = loc.split("\\").last;
-      }
-      String end = Util.getTempFileName(loc);
-      $__TRACE("C_src try to parse loc=$loc -> end=$end");
+      String fileName = loc.contains("/")
+          ? loc.split("/").last
+          : loc.contains("\\")
+              ? loc.split("\\").last
+              : loc;
+      String totalPath = loc.contains("/")
+          ? (loc.split("/")..removeLast()).join("")
+          : loc.contains("\\")
+              ? (loc.split("\\")..removeLast()).join("")
+              : "";
+      String newFileName = Util.getTempFileName(fileName);
+      $__TRACE(
+          "C_src loc=$loc file=$fileName total=$totalPath new=$newFileName");
+      $__FINAL("C_src quit", Codes.kDefaultNoProcess);
     }
   },
 };

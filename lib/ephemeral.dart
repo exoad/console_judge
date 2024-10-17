@@ -17,6 +17,7 @@ final class Strings {
 final class Codes {
   Codes._();
 
-  static const int kInCompleteArgumentsSupplied = 200;
   static const int kOk = 0;
+  static const int kInCompleteArgumentsSupplied = 200;
+  static const int kDefaultNoProcess = 201;
 }
