@@ -15,8 +15,7 @@ void init() {
   parser.addFlag("help", abbr: "h", help: "Print this usage information.");
   parser.addFlag("version",
       abbr: "v", help: "Get the versioning of Console Judge.");
-  parser.addFlag("disable-capture",
-      abbr: "d",
+  parser.addFlag("no-capture",
       help: "Disable the standard capture and compare test-cases mode.",
       defaultsTo: true);
   parser.addOption("src",
@@ -64,6 +63,9 @@ class TestSuite {
 class AppMain {
   static void main(List<String> arguments) {
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      if (kAllowDebugTracing) {
+        $__TRACE("TRACING IS ENABLED. PLEASE TURN OFF FOR PRODUCTION MODE");
+      }
       init();
       try {
         if (arguments.isEmpty) {
@@ -73,13 +75,23 @@ class AppMain {
           ArgResults results = parser.parse(arguments);
           $__TRACE("ArgumentsParsed=${results.arguments}");
           $__TRACE("Rest=${results.rest}");
-          if (results.wasParsed("help") || !results.wasParsed("src")) {
+          $__TRACE("Options=${results.options}");
+          if (results.flag("help")) {
             G_Options["C_help"]!();
-            return;
+            $__FINAL("Detect: results.flag('help')");
           }
-          if (results.wasParsed("version")) {
+          if (results.flag("version")) {
             G_Options["C_version"]!();
-            return;
+            $__FINAL("Detect: results.flag('version')");
+          }
+          if (results.option("src") == null) {
+            G_Options["C_help"]!();
+            $__FINAL("Detect: results.option('src') == null");
+          } else {
+            String srcLoc = results.option("src")!;
+
+            $__FINAL(
+                "Detect: results.option('src') == $srcLoc");
           }
         }
       } catch (ex) {

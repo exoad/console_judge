@@ -13,3 +13,10 @@ final class Strings {
   static final String L_SupportedFileEndings =
       "${Lang.cxx.ext.join(", ")}, ${Lang.c.ext.join(",")}, ${Lang.java.ext.join(",")}, ${Lang.python.ext.join(",")}";
 }
+
+final class Codes {
+  Codes._();
+
+  static const int kInCompleteArgumentsSupplied = 200;
+  static const int kOk = 0;
+}

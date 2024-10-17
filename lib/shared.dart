@@ -4,6 +4,7 @@ import "package:console_judge/app.dart";
 import "package:console_judge/debug.dart";
 import "package:console_judge/ephemeral.dart";
 import "package:console_judge/ext/string_buffer.dart";
+import "package:console_judge/util.dart";
 
 const String kAppName = "Console Judge";
 const int kVersionNumber = 1;
@@ -42,5 +43,21 @@ final Map<String, dynamic Function([List<String>? arguments])> G_Options =
       buffer.toString(),
     );
     return;
+  },
+  "C_src": ([List<String>? args]) {
+    if (args == null) {
+      G_Options["C_help"]!();
+      $__FINAL("Detect_Fatal: C_src(null) resolved!",
+          Codes.kInCompleteArgumentsSupplied);
+    } else {
+      String loc = args[0];
+      if (loc.contains("/")) {
+        loc = loc.split("/").last;
+      } else if (loc.contains("\\")) {
+        loc = loc.split("\\").last;
+      }
+      String end = Util.getTempFileName(loc);
+      $__TRACE("C_src try to parse loc=$loc -> end=$end");
+    }
   },
 };
