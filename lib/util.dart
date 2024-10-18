@@ -16,8 +16,10 @@ final class Util {
           length, (_) => _chars.codeUnitAt(RNG.nextInt(_chars.length))));
 
   /// [original] should just be the file name itself (not some path)
-  static String getTempFileName(String original) {
-    List<String> split = original.split(".");
-    return "${split[0]}__${Util.getRandomString(10)}_\$\$clij.${split[split.length - 1]}";
-  }
+  static String getTempFileName(String original, String execExtension) =>
+      "${original.split(".").first}__${Util.getRandomString(10)}_\$\$clij.$execExtension";
+}
+
+class strict {
+  const strict();
 }

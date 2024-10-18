@@ -1,3 +1,4 @@
+import "dart:io";
 import "dart:math";
 
 import "package:console_judge/app.dart";
@@ -13,7 +14,7 @@ const int kBuildDate = 20241020;
 final Random RNG = Random(DateTime.now().millisecondsSinceEpoch);
 
 /// These properties should only ever be [true] when in dev mode
-const bool kEnforceChecks = true;
+const bool kEnforceChecks = false;
 const bool kAllowDebugTracing = true;
 
 final Map<Lang, String Function(String location)> G_executors =
@@ -76,20 +77,30 @@ final Map<String, dynamic Function([List<String>? arguments])> G_Options =
           Codes.kInCompleteArgumentsSupplied);
     } else {
       String loc = args[0];
-      String fileName = loc.contains("/")
-          ? loc.split("/").last
-          : loc.contains("\\")
-              ? loc.split("\\").last
-              : loc;
-      String totalPath = loc.contains("/")
-          ? (loc.split("/")..removeLast()).join("")
-          : loc.contains("\\")
-              ? (loc.split("\\")..removeLast()).join("")
-              : "";
-      String newFileName = Util.getTempFileName(fileName);
-      $__TRACE(
-          "C_src loc=$loc file=$fileName total=$totalPath new=$newFileName");
-      $__FINAL("C_src quit", Codes.kDefaultNoProcess);
+      if (!File(loc).existsSync()) {
+        throw "Input source file '$loc' does not exist!";
+      }
+      late String outFile;
+      if (!Lang.python.ext.contains(loc.split(".").last)) {
+        String fileName = loc.contains("/")
+            ? loc.split("/").last
+            : loc.contains("\\")
+                ? loc.split("\\").last
+                : loc;
+        String totalPath = loc.contains("/")
+            ? (loc.split("/")..removeLast()).join("/")
+            : loc.contains("\\")
+                ? (loc.split("\\")..removeLast()).join("\\")
+                : "";
+        String newFileName = Util.getTempFileName(
+            fileName, getExecFileExtension(getLang(fileName)));
+        File out = File(totalPath + newFileName);
+        if (out.existsSync()) {
+          out.deleteSync();
+        }
+        outFile = "$totalPath${Platform.pathSeparator}$newFileName";
+      }
+      $__TRACE("outFile = $outFile");
     }
   },
 };
