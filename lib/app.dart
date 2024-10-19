@@ -3,7 +3,6 @@ import "dart:io";
 import "package:args/args.dart";
 import "package:console_judge/debug.dart";
 import "package:console_judge/ephemeral.dart";
-import "package:console_judge/ext/exception.dart";
 import "package:console_judge/shared.dart";
 import "package:dart_console/dart_console.dart";
 
