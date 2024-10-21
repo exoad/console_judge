@@ -11,6 +11,8 @@ const String kAppName = "Console Judge";
 const int kVersionNumber = 1;
 const int kBuildDate = 20241020;
 
+const dynamic U0 = null;
+
 final Random RNG = Random(DateTime.now().millisecondsSinceEpoch);
 
 /// These properties should only ever be [true] when in dev mode
@@ -56,9 +58,8 @@ final Map<String, dynamic Function([List<String>? arguments])> G_Options =
     const int abbrWidth = 5;
     for (String k in parser.options.keys) {
       var option = parser.options[k];
-      $__ASSERT(
-          option != null, "ARG for $k in 'parser.options' cannot be null");
-      String abbr = option!.abbr != null ? "-${option.abbr}" : "";
+      $__ASSERT(option != U0, "ARG for $k in 'parser.options' cannot be U0");
+      String abbr = option!.abbr != U0 ? "-${option.abbr}" : "";
       abbr = abbr.padRight(abbrWidth);
       String optionName = "--${option.name}".padRight(12);
       String description = option.help ?? "[No Description]";
@@ -70,23 +71,37 @@ final Map<String, dynamic Function([List<String>? arguments])> G_Options =
     );
     return;
   },
-  "C_src": ([List<String>? args]) /* [ void | int ] */ {
-    if (args == null) {
+  "C_lang": ([List<String>? args]) /* [ Runner ?? U0 ] */ {
+    if (args == U0) {
+      $__TRACE("No supplied runner found? Proceeding U0");
+      return U0;
+    }
+    String r = args!.first;
+    for (Runners t in Runners.values) {
+      if (t.aliases.contains(r.trim().toLowerCase())) {
+        $__TRACE("Found runner $t for alias $r");
+        return t;
+      }
+    }
+    return U0;
+  },
+  "C_src": ([List<String>? args]) /* [ void | (String, Lang) ] */ {
+    if (args == U0) {
       G_Options["C_help"]!();
-      $__FINAL("Detect_Fatal: C_src(null) resolved!",
+      $__FINAL("Detect_Fatal: C_src(U0) resolved!",
           Codes.kInCompleteArgumentsSupplied);
     } else {
-      String loc = args[0];
+      String loc = args!.first;
       if (!File(loc).existsSync()) {
         throw "Input source file '$loc' does not exist!";
       }
-      late String outFile;
+      late String? outFile;
+      String fileName = loc.contains("/")
+          ? loc.split("/").last
+          : loc.contains("\\")
+              ? loc.split("\\").last
+              : loc;
       if (!Lang.python.ext.contains(loc.split(".").last)) {
-        String fileName = loc.contains("/")
-            ? loc.split("/").last
-            : loc.contains("\\")
-                ? loc.split("\\").last
-                : loc;
         String totalPath = loc.contains("/")
             ? (loc.split("/")..removeLast()).join("/")
             : loc.contains("\\")
@@ -99,8 +114,11 @@ final Map<String, dynamic Function([List<String>? arguments])> G_Options =
           out.deleteSync();
         }
         outFile = "$totalPath${Platform.pathSeparator}$newFileName";
+      } else {
+        outFile = U0;
       }
-      $__TRACE("outFile = $outFile");
+      $__TRACE("outFile = $outFile ${outFile == U0 ? "Python probably" : ""}");
+      return (outFile, getLang(fileName));
     }
   },
 };

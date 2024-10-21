@@ -24,7 +24,7 @@ final class Flags {
     buffer.write(
         "-Wall -Wextra -O2 -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC -fsanitize=undefined -Wshadow -Wformat=2 -Wfloat-equal -Wconversion -Wlogical-op -Wshift-overflow=2 -Wduplicated-cond -Wcast-qual -Wcast-align");
     if (Platform.isLinux) {
-      buffer.write("-D_FORTIFY_SOURCE=2");
+      buffer.write(" -D_FORTIFY_SOURCE=2");
     }
     return buffer.toString();
   }

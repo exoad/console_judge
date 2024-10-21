@@ -20,10 +20,10 @@ void init() {
       help: "Disable the standard capture and compare test-cases mode.",
       defaultsTo: true);
   parser.addFlag("runners", help: "Get a list of supported language versions");
-  parser.addFlag("flags",
-      abbr: "f",
-      defaultsTo: true,
-      help: "Use default flags for the compiling language. Default enabled.");
+  parser.addFlag("noflags",
+      defaultsTo: false,
+      help:
+          "Dont' use default flags for the compiling language. Default enabled.");
   parser.addOption("lang",
       abbr: "l",
       mandatory: false,
@@ -167,7 +167,7 @@ class TestSuite {
 }
 
 class AppMain {
-  static void main(List<String> arguments) {
+  static Future<void> main(List<String> arguments) async {
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       if (kAllowDebugTracing) {
         $__TRACE("TRACING IS ENABLED. PLEASE TURN OFF FOR PRODUCTION MODE");
@@ -200,7 +200,26 @@ class AppMain {
             G_Options["C_help"]!();
             $__FINAL("Detect: results.option('src') == null");
           } else {
-            G_Options["C_src"]!(<String>[results.option("src")!]);
+            (String, Lang) outFile =
+                G_Options["C_src"]!(<String>[results.option("src")!]) as (
+              String,
+              Lang
+            );
+            ({String compile, String executor}) commands = compose(
+                inFile: results.option("src")!,
+                outFile: outFile.$2 == Lang.python
+                    ? results.option("src")!
+                    : outFile.$1,
+                useDefaultFlags: !results.flag("noflags"),
+                runner: G_Options["C_lang"]!(results.option("lang") != null
+                    ? <String>[results.option("lang")!]
+                    : null));
+            List<String> bits = commands.compile.split(" ");
+            bits.remove(0);
+            $__TRACE("Compiler=${commands.compile}");
+            $__TRACE("Executor=${commands.executor}");
+            Process.run(commands.compile.split(" ").first, bits);
+            Process.run(commands.executor, <String>[]);
             $__FINAL(
                 "Detect: results.option('src') == ${results.option("src")}");
           }
